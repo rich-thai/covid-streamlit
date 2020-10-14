@@ -20,23 +20,27 @@ df["Daily Cases"]=df["Total Cases"].diff()
 df["Daily Positivity Rate"]=np.round(df["Daily Cases"]/df["Total tests completed in the last day"]*100,1)
 df['Positivity % (7 day avg)'] = np.round(df["Daily Positivity Rate"].rolling(window=7).mean(),2)
 
-if st.checkbox('Show raw data'):
-    st.subheader('Raw data (last 100)')
-    st.write(df.tail(100))
+# if st.checkbox('Show raw data'):
+#     st.subheader('Raw data (last 100)')
+#     st.write(df.tail(100))
     
-if st.checkbox('Show raw data 2'):
-    st.subheader('Raw data (last 100)')
-    st.write(df2[df2.Case_Reported_Date>'2020-10-01'])
-
+# if st.checkbox('Show raw data 2'):
+#     st.subheader('Raw data (last 100)')
+#     st.write(df2[df2.Case_Reported_Date>'2020-10-01'])
+    
+today = df.iloc[-1]['Reported Date']  
+st.subheader('Last updated: ' + today)
 st.markdown('Cases reported yesterday:')
-today = df.iloc[-1]['Reported Date']   
+ 
 yesterday = datetime.now() - timedelta(1)
-df2filt = df2[df2.Case_Reported_Date>=datetime.strftime(yesterday, '%Y-%m-%d')].groupby(by=['lat','lon', 'Reporting_PHU']).agg({'Row_ID':'count'}).reset_index().rename(columns={'Row_ID':'Count'})   
-st.write(df2filt)
+df2filt = df2[df2.Case_Reported_Date>=datetime.strftime(yesterday, '%Y-%m-%d')]\
+    .groupby(by=['lat','lon', 'Reporting_PHU']).agg({'Row_ID':'count'})\
+    .reset_index().rename(columns={'Row_ID':'Count'})\
+    .sort_values(by='Count', ascending=False)
+st.write(df2filt[['Reporting_PHU', 'Count']])
 
 
 # st.text(df.columns.values)
-st.subheader('Last updated: ' + today)
 st.write(df.iloc[-1][['Daily Deaths','Daily Cases','Daily Positivity Rate','Total tests completed in the last day','Confirmed Positive','Resolved','Deaths','Total Cases', 'Under Investigation','Number of patients hospitalized with COVID-19','Number of patients in ICU with COVID-19']])
 
 fig = px.line(df, x='Reported Date', y='Daily Cases', title='Daily new cases')
