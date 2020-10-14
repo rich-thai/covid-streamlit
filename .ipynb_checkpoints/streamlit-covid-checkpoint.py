@@ -38,10 +38,28 @@ df2filt = df2[df2.Case_Reported_Date>=datetime.strftime(yesterday, '%Y-%m-%d')]\
     .reset_index().rename(columns={'Row_ID':'Count'})\
     .sort_values(by='Count', ascending=False)
 st.write(df2filt[['Reporting_PHU', 'Count']])
+st.write(df.iloc[-1][['Daily Deaths','Daily Cases','Daily Positivity Rate','Total tests completed in the last day','Confirmed Positive','Resolved','Deaths','Total Cases', 'Under Investigation','Number of patients hospitalized with COVID-19','Number of patients in ICU with COVID-19']])
 
+fig = go.Figure(go.Bar(
+            x=df2filt['Count'],
+            y=df2filt['Reporting_PHU'],
+            orientation='h'))
+fig.update_layout(
+    xaxis_title="Cases in the last 7 days",
+    width=100,
+    height=500
+)
+fig.update_yaxes(automargin=True)
+st.plotly_chart(fig, use_container_width=True)
+
+pie_df = df2[df2.Case_Reported_Date>=datetime.strftime(yesterday, '%Y-%m-%d')].groupby(by='Age_Group').agg({'Row_ID':'count'}).rename(columns={'Row_ID':'Count'}).reset_index()
+
+
+fig = px.pie(pie_df, values='Count', names='Age_Group', title='Cases Among Age Groups (last 7 days)')
+st.plotly_chart(fig, use_container_width=True)
 
 # st.text(df.columns.values)
-st.write(df.iloc[-1][['Daily Deaths','Daily Cases','Daily Positivity Rate','Total tests completed in the last day','Confirmed Positive','Resolved','Deaths','Total Cases', 'Under Investigation','Number of patients hospitalized with COVID-19','Number of patients in ICU with COVID-19']])
+
 
 fig = px.line(df, x='Reported Date', y='Daily Cases', title='Daily new cases')
 st.plotly_chart(fig, use_container_width=True)
@@ -75,11 +93,15 @@ st.plotly_chart(fig, use_container_width=True)
 
 # st.map(df2)
 
-fig = px.scatter_geo(df2filt, lat='lat', lon='lon',
-                     size="Count",
-                     hover_name='Reporting_PHU',
-                     labels={'Row_ID'},
-                     text='Count'
-                     )
-fig.update_layout(mapbox_style="open-street-map")
+# fig = px.scatter_geo(df2filt, lat='lat', lon='lon',
+#                      size="Count",
+#                      hover_name='Reporting_PHU',
+#                      labels={'Row_ID'},
+#                      text='Count'
+#                      )
+# fig.update_layout(mapbox_style="open-street-map")
+# st.plotly_chart(fig, use_container_width=True)
+
+fig = px.line(df, x='Reported Date', y='Daily Deaths', title='Daily Deaths')
+
 st.plotly_chart(fig, use_container_width=True)
